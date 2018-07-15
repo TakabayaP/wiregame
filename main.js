@@ -45,16 +45,29 @@ phina.define("Blockt",{
 phina.define("Ground",{
     superClass:"RectangleShape",
     init:function(options,player){
+        options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
         this.player = player;
         this.width = 1024;
+        this.staticFriction = options.staticFriction;
+        this.dynamicFriction = options.dynamicFriction;
+        this.bounce = -options.bounce;
+        this.minBounce = options.minBounce;
     },
     update:function(app){
         if(this.hitTestElement(this.player)){
             this.player.bottom = this.top;
-            this.player.ay *= this.player.ay>0.1?-0.3:0;
-            this.player.ax *= Math.abs(this.player.ax)>0.7?0.4:0;
+            this.player.ay *= this.player.ay>this.minBounce?this.bounce:0;
+            this.player.ax *= Math.abs(this.player.ax)>this.staticFriction?this.dynamicFriction:0;
             
+        }
+    },
+    _static:{
+        defaults:{
+            staticFriction:0.7,
+            dynamicFriction:0.4,
+            bounce:0.3,
+            minBounce:0.1,
         }
     }
 });
