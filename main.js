@@ -21,26 +21,29 @@ phina.define("TestScene", {
     init: function (options) {
         this.superInit(options);
         this.backgroundColor = 'black';
-        this.player = Playert().addChildTo(this).setPosition(this.gridX.span(2),this.gridY.span(14));        
-        Ground({player:this.player}).addChildTo(this).setPosition(this.gridX.center(),this.gridY.span(15));
+        this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
+        this.group = DisplayElement().addChildTo(this).setPosition(0,0);
+        this.group.move = function(x,y){
+            for(let i in this.children){
+                this.children[i].x += x;
+                this.children[i].y += y;
+            }
+        }; 
+        this.ax = 0;
+        this.group.ay = 0;
+        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
     },
     update: function (a) {
         this.onpointstart = function(e){
-            this.player.move(e);
+            //this.player.move(e);
+            //this.ay *= this.ay>0?0:1;
+            //this.ax = -Math.cos(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
+            //this.ay = -Math.sin(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
         };
-    }
-});
-phina.define("Blockt",{
-    superClass:"RectangleShape",
-    init:function(options,player){
-        this.superInit(options);
-        this.player = player;
-        
-    },
-    update:function(app){
-        if(this.hitTestElement(this.player)){
-
-        }
+        //this.group.x += this.ax;
+        //this.group.y +=this.ay;
+        this.group.move(0,this.group.ay);
+        this.group.ay -= Assets.AoG/Assets.FPS;
     }
 });
 phina.define("Ground",{
@@ -48,6 +51,7 @@ phina.define("Ground",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
+        this.group = options.group?options.group:error("Group is not defined");
         this.player = options.player?options.player:error("Player is not defined");
         this.width = 1024;
         this.staticFriction = options.staticFriction;
@@ -57,10 +61,10 @@ phina.define("Ground",{
     },
     update:function(app){
         if(this.hitTestElement(this.player)){
-            this.player.bottom = this.top;
-            this.player.ay *= this.player.ay>this.minBounce?this.bounce:0;
-            this.player.ax *= Math.abs(this.player.ax)>this.staticFriction?this.dynamicFriction:0;
-            
+            //console.log(this.y)//this.group.y-this.player.y;
+            this.group.move(0,-this.top+this.player.bottom);
+            this.group.ay *= this.group.ay>this.minBounce?this.bounce:0;
+            //this.player.ax *= Math.abs(this.player.ax)>this.staticFriction?this.dynamicFriction:0;
         }
     },
     _static:{
@@ -76,19 +80,19 @@ phina.define("Playert",{
     superClass:"CircleShape",
     init:function(options){
         this.superInit(options);
-        this.ax = 0;
-        this.ay = 0;
+        /*this.ax = 0;
+        this.ay = 0;*/
     },
-    move:function(e){
+    /*move:function(e){
         this.ay *= this.ay>0?0:1;
         this.ax = -Math.cos(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
         this.ay = -Math.sin(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
         
-    },
-    update:function(app){
+    },*/
+    update:function(app){/*
         this.x += this.ax;
         this.y +=this.ay;
-        this.ay += Assets.AoG/Assets.FPS;
+        this.ay += Assets.AoG/Assets.FPS;*/
     },
 });
 phina.main(function () {
