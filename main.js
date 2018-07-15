@@ -3,7 +3,7 @@ const Assets = {
     images:{
     },
     FPS:60,
-    AoG:20,//9.8,//acceleration of gravity,
+    AoG:20,//Acceleration of gravity,
     wPower:10
 };
 
@@ -26,7 +26,6 @@ phina.define("TestScene", {
     },
     update: function (a) {
         this.onpointstart = function(e){
-            //console.log(e);
             this.player.move(e);
         };
     }
@@ -49,7 +48,7 @@ phina.define("Ground",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.player = options.player?options.player:error("Player is not defined");//console.error("player is undefined");
+        this.player = options.player?options.player:error("Player is not defined");
         this.width = 1024;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
@@ -81,31 +80,15 @@ phina.define("Playert",{
         this.ay = 0;
     },
     move:function(e){
-       // console.log("move");
         this.ay *= this.ay>0?0:1;
-        //this.ay -= 1;
-        //console.log("move" + this.ay)*/
-        /*this.ax = e.pointer.x/Math.sqrt((e.pointer.x-this.x)**2+(e.pointer.y-this.y)**2);
-        this.ay -= e.pointer.y/Math.sqrt((e.pointer.x-this.x)**2+(e.pointer.y-this.y)**2);*/
-        //console.log((Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)/Math.PI)*180+180);
         this.ax = -Math.cos(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
         this.ay = -Math.sin(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
         
     },
     update:function(app){
-        //this.c++;
-        //this.y +=Assets.AoG*0.5*((this.c/Assets.FPS)**2);
-        /*if(this.bottom > 1024){
-            this.ax = 0;
-            this.ay = -0.01;
-        }*/
-        //console.log("update" + this.ay)
         this.x += this.ax;
         this.y +=this.ay;
-        
         this.ay += Assets.AoG/Assets.FPS;
-        //console.log(this.ax);
-        
     },
 });
 phina.main(function () {
