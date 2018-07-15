@@ -29,20 +29,21 @@ phina.define("TestScene", {
                 this.children[i].y += y;
             }
         }; 
-        this.ax = 0;
+        this.group.ax = 0;
         this.group.ay = 0;
         Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
+        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(14),this.gridY.center(-2));
     },
     update: function (a) {
         this.onpointstart = function(e){
             //this.player.move(e);
-            //this.ay *= this.ay>0?0:1;
-            //this.ax = -Math.cos(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
-            //this.ay = -Math.sin(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
+            this.group.ay *= this.group.ay<0?0:1;
+            this.group.ax = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+            this.group.ay = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
         };
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
-        this.group.move(0,this.group.ay);
+        this.group.move(this.group.ax,this.group.ay);
         this.group.ay -= Assets.AoG/Assets.FPS;
     }
 });
@@ -63,8 +64,8 @@ phina.define("Ground",{
         if(this.hitTestElement(this.player)){
             //console.log(this.y)//this.group.y-this.player.y;
             this.group.move(0,-this.top+this.player.bottom);
-            this.group.ay *= this.group.ay>this.minBounce?this.bounce:0;
-            //this.player.ax *= Math.abs(this.player.ax)>this.staticFriction?this.dynamicFriction:0;
+            this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
+            this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
         }
     },
     _static:{
