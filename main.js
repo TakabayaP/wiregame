@@ -12,7 +12,9 @@ const Scenes = [{
     className: "TestScene",
 }];
 
-
+function error(message){
+    throw new Error(message);
+}
 
 phina.define("TestScene", {
     superClass: "DisplayScene",
@@ -20,7 +22,7 @@ phina.define("TestScene", {
         this.superInit(options);
         this.backgroundColor = 'black';
         this.player = Playert().addChildTo(this).setPosition(this.gridX.span(2),this.gridY.span(14));        
-        Ground({},this.player).addChildTo(this).setPosition(this.gridX.center(),this.gridY.span(15));
+        Ground({player:this.player}).addChildTo(this).setPosition(this.gridX.center(),this.gridY.span(15));
     },
     update: function (a) {
         this.onpointstart = function(e){
@@ -44,10 +46,10 @@ phina.define("Blockt",{
 });
 phina.define("Ground",{
     superClass:"RectangleShape",
-    init:function(options,player){
+    init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.player = player;
+        this.player = options.player?options.player:error("Player is not defined");//console.error("player is undefined");
         this.width = 1024;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
@@ -102,7 +104,7 @@ phina.define("Playert",{
         this.y +=this.ay;
         
         this.ay += Assets.AoG/Assets.FPS;
-        console.log(this.ax);
+        //console.log(this.ax);
         
     },
 });
