@@ -16,6 +16,16 @@ function error(message){
     throw new Error(message);
 }
 
+function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){
+    a = new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by));
+    b = new Vector2(cx-bx,cy-by).cross(new Vector2(px-cx,py-cy));
+    c = new Vector2(ax-cx,ay-cy).cross(new Vector2(px-ax,py-ay));
+    console.log(a,b,c);
+    return a<=0 &&
+    b<=0 &&
+    c<=0;
+}
+
 phina.define("TestScene", {
     superClass: "DisplayScene",
     init: function (options) {
