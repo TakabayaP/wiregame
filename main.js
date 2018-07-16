@@ -3,8 +3,8 @@ const Assets = {
     images:{
     },
     FPS:60,
-    AoG:5,//Acceleration of gravity,
-    wPower:3
+    AoG:20,//Acceleration of gravity,
+    wPower:10
 };
 
 const Scenes = [{
@@ -26,14 +26,13 @@ function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each ve
     c<=0;
 }//out boolean is point in or out of the triangle
 
-function RectanglePointWay(ax,ay,bx,by,cx,cy,dx,dy,px,py){//in b c rectangle's each vertex's coordinate and the coordinate of the point
-    let ex = ax + (dx-ax)/2,ey = ay + (by-ay)/2;          //   a d
-    //console.log("ex =" + ex + "ey ="+ ey);
+function RectanglePointWay(ax,ay,bx,by,cx,cy,dx,dy,px,py){//in a d rectangle's each vertex's coordinate and the coordinate of the point
+    let ex = ax + (dx-ax)/2,ey = ay + (by-ay)/2;          //   b c
     let a = (new Vector2(bx-ax,by-ay).cross(new Vector2(px-ax,py-ay))<0?"-":"+")+
     (new Vector2(ex-ax,ey-ay).cross(new Vector2(px-ex,py-ey))<0?"-":"+")+
     (new Vector2(ex-bx,ey-by).cross(new Vector2(px-bx,py-by))<0?"-":"+");
     console.log(a);
-    return (a==="+--"||a==="---")?"up":(a==="+-+"||a==="--+"?"right":(a==="-++"?"down":(a==="++-"||a==="-+-"?"left":"error")));
+    return (a==="+--"||a==="---")?"up":(a==="+-+"||a==="--+"?"right":(a==="-++"||a==="+++"?"down":(a==="++-"||a==="-+-"?"left":"error")));
 }//out boolean way 
 phina.define("TestScene", {
     superClass: "DisplayScene",
@@ -86,7 +85,27 @@ phina.define("Ground",{
             /*this.group.move(0,-this.top+this.player.bottom);
             this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
             this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
-            console.log(RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2));
+            let way = RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2);
+            if(way === "up"){
+                this.group.move(0,-this.top+this.player.bottom);
+                this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
+                this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
+            }else if(way === "down"){
+                this.group.move(0,-this.bottom+this.player.top);
+                this.group.ay *= this.bounce;
+                this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
+            }else if(way === "right"){
+                this.group.move(-this.right+this.player.left,0);
+                this.group.ay *= this.dynamicFriction;
+                this.group.ax *= this.bounce;
+            }else if(way === "left"){
+                this.group.move(this.player.right-this.left,0);
+                this.group.ay *= this.dynamicFriction;
+                this.group.ax *= this.bounce;
+            }else if(way === "error"){
+                console.log("Error at RectanglePointWay.Trying collision again.");
+            }
+
         }
     },
     _static:{
