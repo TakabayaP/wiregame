@@ -44,7 +44,7 @@ phina.define("TestScene", {
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
         this.group.move(this.group.ax,this.group.ay);
-        this.group.ay -= Assets.AoG/Assets.FPS;
+        this.group.ay -= Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
     }
 });
 phina.define("Ground",{
@@ -81,6 +81,7 @@ phina.define("Playert",{
     superClass:"CircleShape",
     init:function(options){
         this.superInit(options);
+        this.maxSpeed = 50;
         /*this.ax = 0;
         this.ay = 0;*/
     },
