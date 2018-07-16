@@ -31,7 +31,7 @@ function RectanglePointWay(ax,ay,bx,by,cx,cy,dx,dy,px,py){//in a d rectangle's e
     let a = (new Vector2(bx-ax,by-ay).cross(new Vector2(px-ax,py-ay))<0?"-":"+")+
     (new Vector2(ex-ax,ey-ay).cross(new Vector2(px-ex,py-ey))<0?"-":"+")+
     (new Vector2(ex-bx,ey-by).cross(new Vector2(px-bx,py-by))<0?"-":"+");
-    console.log(a);
+    //console.log(a);
     return (a==="+--"||a==="---")?"up":(a==="+-+"||a==="--+"?"right":(a==="-++"||a==="+++"?"down":(a==="++-"||a==="-+-"?"left":"error")));
 }//out boolean way 
 phina.define("TestScene", {
@@ -43,8 +43,8 @@ phina.define("TestScene", {
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
-                this.children[i].x += x;
-                this.children[i].y += y;
+                this.children[i].x -= x;
+                this.children[i].y -= y;
             }
         }; 
         this.group.ax = 0;
@@ -56,13 +56,13 @@ phina.define("TestScene", {
         this.onpointstart = function(e){
             //this.player.move(e);
             this.group.ay *= this.group.ay<0?0:1;
-            this.group.ax = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-            this.group.ay = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+            this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+            this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
         };
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
         this.group.move(this.group.ax,this.group.ay);
-        this.group.ay -= Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
+        this.group.ay += Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
     }
 });
 phina.define("Ground",{
@@ -76,7 +76,7 @@ phina.define("Ground",{
         this.height = 250;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
-        this.bounce = -options.bounce;
+        this.bounce = options.bounce;
         this.minBounce = options.minBounce;
     },
     update:function(app){
@@ -87,21 +87,21 @@ phina.define("Ground",{
             this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
             let way = RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2);
             if(way === "up"){
-                this.group.move(0,-this.top+this.player.bottom);
-                this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
+                this.group.move(0,this.top-this.player.bottom);
+                this.group.ay *= this.group.ay>this.minBounce?-this.bounce:0;
                 this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
             }else if(way === "down"){
-                this.group.move(0,-this.bottom+this.player.top);
-                this.group.ay *= this.bounce;
+                this.group.move(0,this.bottom-this.player.top);
+                this.group.ay *= -this.bounce;
                 this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
             }else if(way === "right"){
-                this.group.move(-this.right+this.player.left,0);
+                this.group.move(this.right-this.player.left,0);
                 this.group.ay *= this.dynamicFriction;
-                this.group.ax *= this.bounce;
+                this.group.ax *= -this.bounce;
             }else if(way === "left"){
-                this.group.move(this.player.right-this.left,0);
+                this.group.move(this.left-this.player.right,0);
                 this.group.ay *= this.dynamicFriction;
-                this.group.ax *= this.bounce;
+                this.group.ax *= -this.bounce;
             }else if(way === "error"){
                 console.log("Error at RectanglePointWay.Trying collision again.");
             }
