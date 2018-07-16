@@ -20,7 +20,7 @@ function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each ve
     let a = new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by)),
     b = new Vector2(cx-bx,cy-by).cross(new Vector2(px-cx,py-cy)),
     c = new Vector2(ax-cx,ay-cy).cross(new Vector2(px-ax,py-ay));
-    console.log(a,b,c);
+    //console.log(a,b,c);
     return a<=0 &&
     b<=0 &&
     c<=0;
@@ -28,15 +28,13 @@ function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each ve
 
 function RectanglePointWay(ax,ay,bx,by,cx,cy,dx,dy,px,py){//in b c rectangle's each vertex's coordinate and the coordinate of the point
     let ex = ax + (dx-ax)/2,ey = ay + (by-ay)/2;          //   a d
-    console.log("ex =" + ex + "ey ="+ ey);
+    //console.log("ex =" + ex + "ey ="+ ey);
     let a = (new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by))<0?"-":"+")+
     (new Vector2(ex-bx,ey-by).cross(new Vector2(px-ex,py-ey))<0?"-":"+")+
     (new Vector2(ax-ex,ay-ey).cross(new Vector2(px-ax,py-ay))<0?"-":"+");
     console.log(a);
     return (a==="+--"||a==="---")?"left":(a==="+-+"||a==="--+"?"down":(a==="-++"?"right":(a==="++-"||a==="-+-"?"up":"error")));
 }//out boolean way 
-console.log(RectanglePointWay(0,0,0,2,4,2,4,0,2,-3));
-console.log(TrianglePointCollision(0,0,0,2,2,1,2,-3));
 phina.define("TestScene", {
     superClass: "DisplayScene",
     init: function (options) {
@@ -84,9 +82,10 @@ phina.define("Ground",{
     update:function(app){
         if(this.hitTestElement(this.player)){
             //console.log(this.y)//this.group.y-this.player.y;
-            this.group.move(0,-this.top+this.player.bottom);
+            /*this.group.move(0,-this.top+this.player.bottom);
             this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
-            this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
+            this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
+            console.log(RectanglePointWay(this.left,this.bottom,this.left,this.top,this.right,this.top,this.right,this.bottom,this.player.top + (this.player.top-this.player.bottom)/2,this.player.right+(this.player.right-this.player.left)));
         }
     },
     _static:{
