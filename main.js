@@ -3,8 +3,8 @@ const Assets = {
     images:{
     },
     FPS:60,
-    AoG:20,//Acceleration of gravity,
-    wPower:10
+    AoG:5,//Acceleration of gravity,
+    wPower:3
 };
 
 const Scenes = [{
@@ -29,11 +29,11 @@ function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each ve
 function RectanglePointWay(ax,ay,bx,by,cx,cy,dx,dy,px,py){//in b c rectangle's each vertex's coordinate and the coordinate of the point
     let ex = ax + (dx-ax)/2,ey = ay + (by-ay)/2;          //   a d
     //console.log("ex =" + ex + "ey ="+ ey);
-    let a = (new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by))<0?"-":"+")+
-    (new Vector2(ex-bx,ey-by).cross(new Vector2(px-ex,py-ey))<0?"-":"+")+
-    (new Vector2(ax-ex,ay-ey).cross(new Vector2(px-ax,py-ay))<0?"-":"+");
+    let a = (new Vector2(bx-ax,by-ay).cross(new Vector2(px-ax,py-ay))<0?"-":"+")+
+    (new Vector2(ex-ax,ey-ay).cross(new Vector2(px-ex,py-ey))<0?"-":"+")+
+    (new Vector2(ex-bx,ey-by).cross(new Vector2(px-bx,py-by))<0?"-":"+");
     console.log(a);
-    return (a==="+--"||a==="---")?"left":(a==="+-+"||a==="--+"?"down":(a==="-++"?"right":(a==="++-"||a==="-+-"?"up":"error")));
+    return (a==="+--"||a==="---")?"up":(a==="+-+"||a==="--+"?"right":(a==="-++"?"down":(a==="++-"||a==="-+-"?"left":"error")));
 }//out boolean way 
 phina.define("TestScene", {
     superClass: "DisplayScene",
@@ -74,6 +74,7 @@ phina.define("Ground",{
         this.group = options.group?options.group:error("Group is not defined");
         this.player = options.player?options.player:error("Player is not defined");
         this.width = 1024;
+        this.height = 250;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
         this.bounce = -options.bounce;
@@ -85,7 +86,7 @@ phina.define("Ground",{
             /*this.group.move(0,-this.top+this.player.bottom);
             this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
             this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
-            console.log(RectanglePointWay(this.left,this.bottom,this.left,this.top,this.right,this.top,this.right,this.bottom,this.player.top + (this.player.top-this.player.bottom)/2,this.player.right+(this.player.right-this.player.left)));
+            console.log(RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2));
         }
     },
     _static:{
