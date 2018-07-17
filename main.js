@@ -3,8 +3,9 @@ const Assets = {
     images:{
     },
     FPS:60,
-    AoG:20,//Acceleration of gravity,
-    wPower:10
+    AoG:5,//Acceleration of gravity,
+    wPower:6,
+    maxSpeed:1
 };
 
 const Scenes = [{
@@ -61,8 +62,10 @@ phina.define("TestScene", {
         };
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
-        this.group.move(this.group.ax,this.group.ay);
-        this.group.ay += Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
+        this.group.move((function(ax,pmx){return Math.abs(ax)>pmx?ax:0;})(this.group.ax,this.player.maxSpeed),this.group.ay);
+        this.group.ay += this.group.ay>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
+        this.group.ay *= this.group.ay>this.player.maxSpeed?0.95:1;
+        this.group.ax *= Math.abs(this.group.ax)>this.player.maxSpeed?0.95:1;
     }
 });
 phina.define("Ground",{
@@ -121,7 +124,7 @@ phina.define("Playert",{
     superClass:"CircleShape",
     init:function(options){
         this.superInit(options);
-        this.maxSpeed = 50;
+        this.maxSpeed = Assets.maxSpeed;
         /*this.ax = 0;
         this.ay = 0;*/
     },
