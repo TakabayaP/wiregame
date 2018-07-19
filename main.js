@@ -20,7 +20,7 @@ const Assets = {
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
                 [1,0,1,0,0,0,1,0,0,1,],
-                [1,1,1,0,1,0,1,0,0,1,],
+                [1,0,1,0,1,0,1,0,0,1,],
                 [1,0,1,0,0,0,1,0,0,1,],
                 [1,0,0,0,1,1,0,0,0,1,],
                 [1,0,1,0,1,0,0,1,0,1,],
@@ -83,13 +83,12 @@ phina.define("TestScene", {
         this.group.ay = 0;
         MyMap(this.mapName).generate(this.group);
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
-        //this.group.setMapPosition(2,2);
+        this.group.setMapPosition(2,2);
     },
     update: function (app) {
         this.onpointstart = function(e){
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
             if(this.player.canMove){
-                this.group.setMapPosition(4,4);
                 this.group.ay *= this.group.ay<0?0:1;
                 this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
