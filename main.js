@@ -1,5 +1,10 @@
 //app.currentSceneだよ!!!
 phina.globalize();
+let maps = {
+    map2:{
+        map
+    }
+}
 const Assets = {
     images:{
     },
@@ -28,7 +33,8 @@ const Assets = {
                 [1,0,1,1,1,0,1,1,0,1,],
                 [1,0,0,0,1,0,0,1,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],]
-        }
+        },
+        map2:{}
     }
 };
 
@@ -74,7 +80,6 @@ phina.define("TestScene", {
         };
         let self = this;
         this.group.setMapPosition = function(x,y){
-            console.log(this.children[0].x,this.children[0].y);
             this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
             this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
         }
