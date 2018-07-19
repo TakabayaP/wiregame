@@ -5,7 +5,9 @@ const Assets = {
     FPS:60,
     AoG:5,//Acceleration of gravity,
     wPower:6,
-    maxSpeed:1
+    maxSpeed:1,
+    milPerFrame:1/60,//FPS
+    playerMoveInterval:0.8
 };
 
 const Scenes = [{
@@ -53,19 +55,24 @@ phina.define("TestScene", {
         Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
         Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(14),this.gridY.center(-2));
     },
-    update: function (a) {
+    update: function (app) {
         this.onpointstart = function(e){
             //this.player.move(e);
-            this.group.ay *= this.group.ay<0?0:1;
-            this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-            this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
+            console.log(Assets.milPerFrame*(app.frame-this.player.moveCounter));
+            if(this.player.canMove){
+                this.group.ay *= this.group.ay<0?0:1;
+                this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.player.moveCounter = app.frame;
+        }
         };
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
-        this.group.move((function(ax,pmx){return Math.abs(ax)>pmx?ax:0;})(this.group.ax,this.player.maxSpeed),this.group.ay);
+        this.group.move(this.group.ax,this.group.ay);//(function(ax,pmx){return Math.abs(ax)>pmx?ax:0;})(this.group.ax,this.player.maxSpeed),this.group.ay);
         this.group.ay += this.group.ay>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
         this.group.ay *= this.group.ay>this.player.maxSpeed?0.95:1;
-        this.group.ax *= Math.abs(this.group.ax)>this.player.maxSpeed?0.95:1;
+        this.group.ax *= Math.abs(this.group.ax)>this.player.maxSpeed?0.95:0.995;
     }
 });
 phina.define("Ground",{
@@ -125,6 +132,8 @@ phina.define("Playert",{
     init:function(options){
         this.superInit(options);
         this.maxSpeed = Assets.maxSpeed;
+        this.canMove = true;
+        this.moveCounter = 0;
         /*this.ax = 0;
         this.ay = 0;*/
     },
