@@ -20,7 +20,7 @@ const Assets = {
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
                 [1,0,1,0,0,0,1,0,0,1,],
-                [1,0,1,0,1,0,1,0,0,1,],
+                [1,1,1,0,1,0,1,0,0,1,],
                 [1,0,1,0,0,0,1,0,0,1,],
                 [1,0,0,0,1,1,0,0,0,1,],
                 [1,0,1,0,1,0,0,1,0,1,],
@@ -64,22 +64,32 @@ phina.define("TestScene", {
     init: function (options) {
         this.superInit(options);
         this.backgroundColor = 'black';
+        this.mapName = "map1";
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
                 this.children[i].x -= x;
                 this.children[i].y -= y;
             }
-        }; 
+        };
+        let self = this;
+        this.group.setMapPosition = function(x,y){
+            console.log(this.children[0].x,this.children[0].y);
+            this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
+            this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
+        }
+        ;
         this.group.ax = 0;
         this.group.ay = 0;
-        MyMap("map1").generate(this.group);
+        MyMap(this.mapName).generate(this.group);
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
+        //this.group.setMapPosition(2,2);
     },
     update: function (app) {
         this.onpointstart = function(e){
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
             if(this.player.canMove){
+                this.group.setMapPosition(4,4);
                 this.group.ay *= this.group.ay<0?0:1;
                 this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
