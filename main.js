@@ -116,7 +116,7 @@ phina.define("ImageObject",{
         this.superInit(options);
         this.color = "yellow";
     }
-})
+});
 phina.define("Ground",{
     superClass:"RectangleShape",
     init:function(options){
