@@ -8,7 +8,7 @@ const Assets = {
     wPower:6,
     maxSpeed:1,
     milPerFrame:1/60,//FPS
-    playerMoveInterval:0.5,
+    playerMoveInterval:0.3,
     screenWidth:1024,
     screenHeight:1024,
     mapChipAdd:1.5,
@@ -79,7 +79,6 @@ phina.define("TestScene", {
     update: function (app) {
         this.onpointstart = function(e){
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
-            console.log(Assets.milPerFrame*(app.frame-this.player.moveCounter));
             if(this.player.canMove){
                 this.group.ay *= this.group.ay<0?0:1;
                 this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
