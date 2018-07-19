@@ -4,7 +4,7 @@ const Assets = {
     },
     FPS:60,
     AoG:5,//Acceleration of gravity,
-    wPower:6,
+    wPower:20,//6,
     maxSpeed:1,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0,//.5,
@@ -17,14 +17,14 @@ const Assets = {
             mapChipSize:1024/5,
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
-                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,1,0,0,0,1,0,0,1,],
+                [1,0,1,0,1,0,1,0,0,1,],
+                [1,0,1,0,0,0,1,0,0,1,],
+                [1,0,0,0,1,1,0,0,0,1,],
+                [1,0,1,0,1,0,0,1,0,1,],
+                [1,0,1,0,0,0,1,1,0,1,],
+                [1,0,1,1,1,0,1,1,0,1,],
+                [1,0,0,0,1,0,0,1,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],]
         }
     }
@@ -112,7 +112,7 @@ phina.define("MyMap",{
                     height:this.mapChipSize,
                 }).addChildTo();*/
                 console.log("Gen");
-                if(this.map.main[x][y]!==0)MapChip(this.map.main[x][y],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+                if(this.map.main[y][x]!==0)MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
             }
         }
     }
