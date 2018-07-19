@@ -100,7 +100,7 @@ phina.define("MyMap",{
     generate:function(parent){
         for(let y in this.map.main){
             for(let x in this.map.main[y]){
-                MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+                aMapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
             }
         }
     }
