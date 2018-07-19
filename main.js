@@ -100,13 +100,13 @@ phina.define("MyMap",{
     generate:function(parent){
         for(let y in this.map.main){
             for(let x in this.map.main[y]){
-                if(this.map.main[y][x]!==0)MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+                MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
             }
         }
     }
 });
 function MapChip(mapChipNo,size){
-    //if(mapChipNo === 0)return ImageObject({})
+    if(mapChipNo === 0)return ImageObject({})
     if(mapChipNo === 1)return Ground({width:size,height:size});
 }
 
