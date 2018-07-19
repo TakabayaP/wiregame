@@ -116,6 +116,7 @@ phina.define("ImageObject",{
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
         this.fill = "yellow";
+        this.strokeWidth = 0;
         this.width = options.width + Assets.mapChipAdd;
         this.height = options.height + Assets.mapChipAdd;
     }
@@ -128,6 +129,7 @@ phina.define("Ground",{
        
         this.width = options.width + Assets.mapChipAdd;
         this.height = options.height + Assets.mapChipAdd;
+        this.strokeWidth = 0;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
         this.bounce = options.bounce;
