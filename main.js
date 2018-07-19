@@ -1,10 +1,5 @@
 //app.currentSceneだよ!!!
 phina.globalize();
-let maps = {
-    map2:{
-        map
-    }
-}
 const Assets = {
     images:{
     },
@@ -33,8 +28,7 @@ const Assets = {
                 [1,0,1,1,1,0,1,1,0,1,],
                 [1,0,0,0,1,0,0,1,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],]
-        },
-        map2:{}
+        }
     }
 };
 
