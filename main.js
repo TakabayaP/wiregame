@@ -64,7 +64,6 @@ phina.define("TestScene", {
     init: function (options) {
         this.superInit(options);
         this.backgroundColor = 'black';
-        this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
@@ -75,6 +74,7 @@ phina.define("TestScene", {
         this.group.ax = 0;
         this.group.ay = 0;
         MyMap("map1").generate(this.group);
+        this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
     update: function (app) {
         this.onpointstart = function(e){
