@@ -106,7 +106,7 @@ phina.define("MyMap",{
     }
 });
 function MapChip(mapChipNo,size){
-    if(mapChipNo === 0)return ImageObject({})
+    if(mapChipNo === 0)return ImageObject({width:size,height:size});
     if(mapChipNo === 1)return Ground({width:size,height:size});
 }
 
