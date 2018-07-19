@@ -7,13 +7,34 @@ const Assets = {
     wPower:6,
     maxSpeed:1,
     milPerFrame:1/60,//FPS
-    playerMoveInterval:0.8
+    playerMoveInterval:0,//.5,
+    screenWidth:1024,
+    screenHeight:1024,
+    maps:{
+        map1:{
+            mapHeight:10,
+            mapWidth:10,
+            mapChipSize:1024/5,
+            main:[
+                [1,1,1,1,1,1,1,1,1,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
+                [1,1,1,1,1,1,1,1,1,1,],]
+        }
+    }
 };
 
 const Scenes = [{
     label: "test",
     className: "TestScene",
 }];
+var NowScene;
 
 function error(message){
     throw new Error(message);
@@ -41,6 +62,7 @@ phina.define("TestScene", {
     superClass: "DisplayScene",
     init: function (options) {
         this.superInit(options);
+        NowScene = this;
         this.backgroundColor = 'black';
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
@@ -52,8 +74,11 @@ phina.define("TestScene", {
         }; 
         this.group.ax = 0;
         this.group.ay = 0;
-        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
+        MyMap("map1").generate(this.group);
+        /*Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
         Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(14),this.gridY.center(-2));
+        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(30),this.gridY.center(-2));
+        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(14),this.gridY.center(-6));*/
     },
     update: function (app) {
         this.onpointstart = function(e){
@@ -75,15 +100,45 @@ phina.define("TestScene", {
         this.group.ax *= Math.abs(this.group.ax)>this.player.maxSpeed?0.95:0.995;
     }
 });
+phina.define("MyMap",{
+    init:function(mapName){
+        this.map = Assets.maps[mapName];
+    },
+    generate:function(parent){
+        for(let y in this.map.main){
+            for(let x in this.map.main[y]){
+                /*Ground({
+                    width:this.map.mapChipSize,
+                    height:this.mapChipSize,
+                }).addChildTo();*/
+                console.log("Gen");
+                if(this.map.main[x][y]!==0)MapChip(this.map.main[x][y],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+            }
+        }
+    }
+});
+function MapChip(mapChipNo,size){
+    //if(mapChipNo === 0)return ImageObject({})
+    if(mapChipNo === 1)return Ground({width:size,height:size});
+}
+
+phina.define("ImageObject",{
+    superClass:"RectangleShape",
+    init:function(options){
+        options = (options || {}).$safe(Ground.defaults);
+        this.superInit(options);
+        this.color = "yellow";
+    }
+})
 phina.define("Ground",{
     superClass:"RectangleShape",
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.group = options.group?options.group:error("Group is not defined");
-        this.player = options.player?options.player:error("Player is not defined");
-        this.width = 1024;
-        this.height = 250;
+        this.group = NowScene.group?NowScene.group:error("Group is not defined");
+        this.player = NowScene.player?NowScene.player:error("Player is not defined");
+        this.width = options.width;
+        this.height = options.height;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
         this.bounce = options.bounce;
@@ -153,8 +208,8 @@ phina.main(function () {
     var app = GameApp({
         startLabel: 'test',
         //assets:Assets,
-        width: 1024,
-        height: 1024,
+        width: Assets.screenWidth,
+        height: Assets.screenHeight,
         scenes: Scenes,
     });
     app.fps = Assets.FPS;
