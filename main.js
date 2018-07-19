@@ -1,3 +1,4 @@
+//app.currentSceneだよ!!!
 phina.globalize();
 const Assets = {
     images:{
@@ -34,7 +35,6 @@ const Scenes = [{
     label: "test",
     className: "TestScene",
 }];
-var NowScene;
 
 function error(message){
     throw new Error(message);
@@ -62,7 +62,6 @@ phina.define("TestScene", {
     superClass: "DisplayScene",
     init: function (options) {
         this.superInit(options);
-        NowScene = this;
         this.backgroundColor = 'black';
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
@@ -123,8 +122,7 @@ phina.define("Ground",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.group = NowScene.group?NowScene.group:error("Group is not defined");
-        this.player = NowScene.player?NowScene.player:error("Player is not defined");
+       
         this.width = options.width;
         this.height = options.height;
         this.staticFriction = options.staticFriction;
@@ -133,6 +131,10 @@ phina.define("Ground",{
         this.minBounce = options.minBounce;
     },
     update:function(app){
+        if(app.frame === 0){
+            this.group = app.currentScene.group?app.currentScene.group:error("Group is not defined");
+            this.player = app.currentScene.player?app.currentScene.player:error("Player is not defined");
+        }
         if(this.hitTestElement(this.player)){
             let way = RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2);
             if(way === "up"){
