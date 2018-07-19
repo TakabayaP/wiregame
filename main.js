@@ -5,13 +5,13 @@ const Assets = {
     },
     FPS:60,
     AoG:5,//Acceleration of gravity,
-    wPower:20,//6,
+    wPower:6,
     maxSpeed:1,
     milPerFrame:1/60,//FPS
-    playerMoveInterval:0,//.5,
+    playerMoveInterval:0.5,
     screenWidth:1024,
     screenHeight:1024,
-    mapChipAdd:1,
+    mapChipAdd:1.5,
     maps:{
         map1:{
             mapHeight:10,
