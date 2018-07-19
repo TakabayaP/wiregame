@@ -11,6 +11,7 @@ const Assets = {
     playerMoveInterval:0,//.5,
     screenWidth:1024,
     screenHeight:1024,
+    mapChipAdd:1,
     maps:{
         map1:{
             mapHeight:10,
@@ -114,7 +115,9 @@ phina.define("ImageObject",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.color = "yellow";
+        this.fill = "yellow";
+        this.width = options.width + Assets.mapChipAdd;
+        this.height = options.height + Assets.mapChipAdd;
     }
 });
 phina.define("Ground",{
@@ -123,8 +126,8 @@ phina.define("Ground",{
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
        
-        this.width = options.width;
-        this.height = options.height;
+        this.width = options.width + Assets.mapChipAdd;
+        this.height = options.height + Assets.mapChipAdd;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
         this.bounce = options.bounce;
