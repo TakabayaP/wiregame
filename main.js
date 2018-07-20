@@ -1,15 +1,5 @@
 //app.currentSceneだよ!!!
 phina.globalize();
-
-function getMap(mapName){
-    this.map = mapOrigin[mapName] || "error";
-    if(this.map === "error")error("map name not defined");
-    let rMap = [],x = this.map[0],y = this.map[1];
-    for(i = 0;i < (this.map.length-2)/x;i++){
-       rMap.push(this.map.slice(x*i+2,x*(i+1)+2));
-    }
-    return rMap;
-}
 const Assets = {
     images:{
     },
@@ -36,12 +26,21 @@ const Assets = {
                 [1,0,1,0,1,0,0,1,0,1,],
                 [1,0,1,0,0,0,1,1,0,1,],
                 [1,0,1,1,1,0,1,1,0,1,],
-                [1,0,0,0,1,0,0,1,0,1,],
+                [1,2,0,0,1,0,0,1,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],]
+        },
+        map2:{
+            mapChipSize:1024/14
         }
     }
 };
-
+/*
+0:nothing,
+1:background,
+2:wall,
+3:needle,
+4:goal,
+*/
 
 const Scenes = [{
     label: "test",
