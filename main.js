@@ -115,18 +115,27 @@ phina.define("MyMap",{
     init:function(mapName){
         this.map = Assets.maps[mapName];
     },
+    getMap:function(mapName){
+        this.map = mapOrigin[mapName] || "error";
+        if(this.map === "error")error("map name not defined");
+        let rMap = [],x = this.map[0],y = this.map[1];
+        for(i = 0;i < (this.map.length-2)/x;i++){
+           rMap.push(this.map.slice(x*i+2,x*(i+1)+2));
+        }
+        return rMap;
+    },
     generate:function(parent){
         for(let y in this.map.main){
             for(let x in this.map.main[y]){
-                MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+                this.MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
             }
         }
+    },
+    MapChip:function(mapChipNo,size){
+        if(mapChipNo === 0)return ImageObject({width:size,height:size});
+        if(mapChipNo === 1)return Ground({width:size,height:size});
     }
 });
-function MapChip(mapChipNo,size){
-    if(mapChipNo === 0)return ImageObject({width:size,height:size});
-    if(mapChipNo === 1)return Ground({width:size,height:size});
-}
 
 phina.define("ImageObject",{
     superClass:"RectangleShape",
