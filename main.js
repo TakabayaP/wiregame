@@ -5,7 +5,7 @@ const Assets = {
     FPS:60,
     AoG:30,//Acceleration of gravity,
     wPower:10,
-    maxSpeed:500,
+    maxSpeed:40,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0.1,
     screenWidth:1024,
@@ -25,7 +25,7 @@ const Assets = {
                 [1,0,1,0,1,0,0,1,0,1,],
                 [1,0,1,0,0,0,1,1,0,1,],
                 [1,0,1,1,1,0,1,1,0,1,],
-                [1,2,0,0,1,0,0,1,0,1,],
+                [1,0,0,0,0,0,0,0,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],]
         },
         map2:{
@@ -68,6 +68,7 @@ phina.define("TestScene", {
         this.backgroundColor = 'black';
         this.mapName = "map1";
         let self = this;
+        this.gravity = Assets.AoG/Assets.FPS;
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
@@ -88,15 +89,18 @@ phina.define("TestScene", {
         this.onpointstart = function(e){
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
             if(this.player.canMove){
-                this.group.ay *= this.group.ay<0?0:1;
+                this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
+                this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
                 this.group.ax -= Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay -= Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.player.moveCounter = app.frame;
+                console.log(Math.floor(this.group.ax));
         }};
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
-        this.group.move(this.group.ax,this.group.ay);
-        this.group.ay += Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
+        this.group.move(Math.abs(this.group.ax)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ax):this.group.ax,Math.abs(this.group.ay)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ay):this.group.ay);
+        console.log(Math.floor(this.group.ax));
+        this.group.ay +=this.gravity;
     }
 });
 phina.define("MyMap",{
