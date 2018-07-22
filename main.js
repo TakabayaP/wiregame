@@ -4,7 +4,34 @@ const Assets = {
     },
     FPS:60,
     AoG:20,//Acceleration of gravity,
-    wPower:10
+    wPower:10,
+    maxSpeed:50,
+    milPerFrame:1/60,//FPS
+    playerMoveInterval:0.3,
+    screenWidth:1024,
+    screenHeight:1024,
+    mapChipAdd:1.5,
+    maps:{
+        map1:{
+            //mapHeight:10,
+            //mapWidth:10,
+            mapChipSize:1024/5,
+            main:[
+                [1,1,1,1,1,1,1,1,1,1,],
+                [1,0,1,0,0,0,1,0,0,1,],
+                [1,0,1,0,1,0,1,0,0,1,],
+                [1,0,1,0,0,0,1,0,0,1,],
+                [1,0,0,0,1,1,0,0,0,1,],
+                [1,0,1,0,1,0,0,1,0,1,],
+                [1,0,1,0,0,0,1,1,0,1,],
+                [1,0,1,1,1,0,1,1,0,1,],
+                [1,2,0,0,1,0,0,1,0,1,],
+                [1,1,1,1,1,1,1,1,1,1,],]
+        },
+        map2:{
+            mapChipSize:1024/14
+        }
+    }
 };
 
 const Scenes = [{
@@ -39,7 +66,8 @@ phina.define("TestScene", {
     init: function (options) {
         this.superInit(options);
         this.backgroundColor = 'black';
-        this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
+        this.mapName = "map1";
+        let self = this;
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
@@ -47,22 +75,71 @@ phina.define("TestScene", {
                 this.children[i].y -= y;
             }
         }; 
+        this.group.setMapPosition = function(x,y){
+            this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
+            this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
+        };
         this.group.ax = 0;
         this.group.ay = 0;
-        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(),this.gridY.center(5));//span(15));
-        Ground({player:this.player,group:this.group}).addChildTo(this.group).setPosition(this.gridX.center(14),this.gridY.center(-2));
+        MyMap(this.mapName).generate(this.group);
+        this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
-    update: function (a) {
+    update: function (app) {
         this.onpointstart = function(e){
-            //this.player.move(e);
-            this.group.ay *= this.group.ay<0?0:1;
-            this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-            this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-        };
+            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
+            if(this.player.canMove){
+                this.group.ay *= this.group.ay<0?0:1;
+                this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.player.moveCounter = app.frame;
+        }};
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
         this.group.move(this.group.ax,this.group.ay);
         this.group.ay += Math.abs(this.group.ay)>this.player.maxSpeed?0:Assets.AoG/Assets.FPS;
+    }
+});
+phina.define("MyMap",{
+    init:function(mapName){
+        this.map = Assets.maps[mapName];
+    },
+    getMap:function(mapName){
+        this.map = mapOrigin[mapName] || "error";
+        if(this.map === "error")error("map name not defined");
+        let rMap = [],x = this.map[0],y = this.map[1];
+        for(i = 0;i < (this.map.length-2)/x;i++){
+           rMap.push(this.map.slice(x*i+2,x*(i+1)+2));
+        }
+        return rMap;
+    },
+    generate:function(parent){
+        for(let y in this.map.main){
+            for(let x in this.map.main[y]){
+                this.MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
+            }
+        }
+    },
+    MapChip:function(mapChipNo,size){
+        /*
+        if(mapChipNo === 0)return RectangleObject({width:size,height:size});
+        if(mapChipNo === 1)return Ground({width:size,height:size});
+        */
+       switch(mapChipNo){
+           case 0:return RectangleObject({width:size,height:size});
+           case 1:return Ground({width:size,height:size});
+           default:console.log("mapChipNo is not defined");return RectangleObject({width:size,height:size});
+       }
+    }
+});
+phina.define("RectangleObject",{
+    superClass:"RectangleShape",
+    init:function(options){
+        options = (options || {}).$safe(Ground.defaults);
+        this.superInit(options);
+        this.fill = "yellow";
+        this.strokeWidth = 0;
+        this.width = options.width + Assets.mapChipAdd;
+        this.height = options.height + Assets.mapChipAdd;
     }
 });
 phina.define("Ground",{
@@ -70,16 +147,19 @@ phina.define("Ground",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
-        this.group = options.group?options.group:error("Group is not defined");
-        this.player = options.player?options.player:error("Player is not defined");
-        this.width = 1024;
-        this.height = 250;
+        this.width = options.width + Assets.mapChipAdd;
+        this.height = options.height + Assets.mapChipAdd;
+        this.strokeWidth = 0;
         this.staticFriction = options.staticFriction;
         this.dynamicFriction = options.dynamicFriction;
         this.bounce = options.bounce;
         this.minBounce = options.minBounce;
     },
     update:function(app){
+        if(app.frame === 0){
+            this.group = app.currentScene.group?app.currentScene.group:error("Group is not defined");
+            this.player = app.currentScene.player?app.currentScene.player:error("Player is not defined");
+        }
         if(this.hitTestElement(this.player)){
             //console.log(this.y)//this.group.y-this.player.y;
             /*this.group.move(0,-this.top+this.player.bottom);
@@ -122,6 +202,9 @@ phina.define("Playert",{
     init:function(options){
         this.superInit(options);
         this.maxSpeed = 50;
+        this.maxSpeed = Assets.maxSpeed;
+        this.canMove = true;
+        this.moveCounter = 0;
         /*this.ax = 0;
         this.ay = 0;*/
     },
