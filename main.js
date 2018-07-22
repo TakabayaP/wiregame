@@ -131,12 +131,19 @@ phina.define("MyMap",{
         }
     },
     MapChip:function(mapChipNo,size){
-        if(mapChipNo === 0)return ImageObject({width:size,height:size});
+        /*
+        if(mapChipNo === 0)return RectangleObject({width:size,height:size});
         if(mapChipNo === 1)return Ground({width:size,height:size});
+        */
+       switch(mapChipNo){
+           case 0:return RectangleObject({width:size,height:size});
+           case 1:return Ground({width:size,height:size});
+           default:console.log("mapChipNo is not defined");return RectangleObject({width:size,height:size});
+       }
     }
 });
 
-phina.define("ImageObject",{
+phina.define("RectangleObject",{
     superClass:"RectangleShape",
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
