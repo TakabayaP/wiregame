@@ -3,11 +3,11 @@ const Assets = {
     images:{
     },
     FPS:60,
-    AoG:20,//Acceleration of gravity,
+    AoG:30,//Acceleration of gravity,
     wPower:10,
-    maxSpeed:50,
+    maxSpeed:500,
     milPerFrame:1/60,//FPS
-    playerMoveInterval:0.3,
+    playerMoveInterval:0.1,
     screenWidth:1024,
     screenHeight:1024,
     mapChipAdd:1.5,
@@ -18,7 +18,7 @@ const Assets = {
             mapChipSize:1024/5,
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
-                [1,0,1,0,0,0,1,0,0,1,],
+                [0,0,1,0,0,0,1,0,0,1,],
                 [1,0,1,0,1,0,1,0,0,1,],
                 [1,0,1,0,0,0,1,0,0,1,],
                 [1,0,0,0,1,1,0,0,0,1,],
@@ -89,8 +89,8 @@ phina.define("TestScene", {
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
             if(this.player.canMove){
                 this.group.ay *= this.group.ay<0?0:1;
-                this.group.ax = -Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-                this.group.ay = -Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.ax -= Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.ay -= Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.player.moveCounter = app.frame;
         }};
         //this.group.x += this.ax;
