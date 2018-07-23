@@ -89,23 +89,31 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){
-            //this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
-            if(Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval){
+            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
+            console.log(this.player.canMove);
+            if(this.player.canMove){
                 this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
                 this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
                 this.group.ax -= this.group.moveWX;
                 this.group.ay -= this.group.moveWY;
+                this.group.pax = this.group.ax;
+                this.group.pay = this.group.ay;
                 this.player.moveCounter = app.frame;
-                console.log(Math.floor(this.group.ax));
             }
         };
+        
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
         this.group.move(Math.abs(this.group.ax)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ax):this.group.ax,Math.abs(this.group.ay)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ay):this.group.ay);
-        console.log(Math.floor(this.group.ax));
         this.group.ay +=this.gravity;
+        this.onpointstay = function(e){
+            if(this.player.canMove){
+                this.group.ay = this.group.pay;
+                this.group.ax = this.group.pax;
+            }
+        };
     }
 });
 phina.define("MyMap",{
@@ -194,8 +202,14 @@ phina.define("Ground",{
             }else if(way === "error"){
                 console.log("Error at RectanglePointWay.Trying collision again.");
             }
-
+            app.currentScene.onpointstay = function(){
+                this.group.ax = 0;
+                this.group.ay = 0;
+                this.group.pax = 0;
+                this.group.pay = 0;
+            };
         }
+        
     },
     _static:{
         defaults:{
