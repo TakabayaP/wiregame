@@ -5,6 +5,8 @@ const Assets = {
     FPS:60,
     AoG:30,//Acceleration of gravity,
     wPower:10,
+    wSpeed:1,
+    wLength:400,
     maxSpeed:40,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0.1,
@@ -87,15 +89,18 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){
-            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
-            if(this.player.canMove){
+            //this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
+            if(Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval){
+                this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
                 this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
-                this.group.ax -= Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-                this.group.ay -= Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.group.ax -= this.group.moveWX;
+                this.group.ay -= this.group.moveWY;
                 this.player.moveCounter = app.frame;
                 console.log(Math.floor(this.group.ax));
-        }};
+            }
+        };
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
         this.group.move(Math.abs(this.group.ax)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ax):this.group.ax,Math.abs(this.group.ay)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ay):this.group.ay);
@@ -223,6 +228,15 @@ phina.define("Playert",{
         this.y +=this.ay;
         this.ay += Assets.AoG/Assets.FPS;*/
     },
+});
+phina.define("WireHead",{
+    superClass:"RectangleShape",
+    init:function(options){
+        this.superInit(options);
+        this.width = 1;
+        this.height = Assets.wLength;
+        this.strokeWidth = 0;
+    }
 });
 phina.main(function () {
     var app = GameApp({
