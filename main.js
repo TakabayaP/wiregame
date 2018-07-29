@@ -1,4 +1,16 @@
 phina.globalize();
+phina.define("Line",{
+    sx:0,
+    sy:0,
+    fx:0,
+    fy:0,
+    init:function(sx,sy,fx,fy){
+        this.sx = sx,
+        this.sy = sy,
+        this.fx = fx,
+        this.fy = fy;
+    }
+});
 const Assets = {
     images:{
     },
@@ -46,7 +58,7 @@ function error(message){
 }
 
 function LineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy){
-    if(isLineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy))return false;
+    if(!isLineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy))return false;
     let a = new Vector2(bfx-bsx,bfy-bsy).cross(new Vector2(bsx-asx,bsy-asy)),
     b = new Vector2(bfx-bsx,bfy-bsy).cross(new Vector2(afx-asx,afy-asy));
     if (!b)return false;
@@ -56,22 +68,49 @@ function LineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy){
         y:asy + (afy-asy)*t
     };
 }
+function test(a,b,c,d){
+    return 100*(a-c)/Math.sqrt((a-c)**2+(b-d)**2);
+}
 function isLineLineCollision(ax, ay, bx, by, cx, cy, dx, dy) {
     var ta = (cx - dx) * (ay - cy) + (cy - dy) * (cx - ax);
     var tb = (cx - dx) * (by - cy) + (cy - dy) * (cx - bx);
     var tc = (ax - bx) * (cy - ay) + (ay - by) * (ax - cx);
     var td = (ax - bx) * (dy - ay) + (ay - by) * (ax - dx);
   
-    return tc * td < 0 && ta * tb < 0;
-    // return tc * td <= 0 && ta * tb <= 0; // 端点を含む場合
+    //return tc * td < 0 && ta * tb < 0;
+    return tc * td <= 0 && ta * tb <= 0; // 端点を含む場合
 }//https://qiita.com/ykob/items/ab7f30c43a0ed52d16f2
-console.log(LineLineCollision(1,1,3,1,2,0,2,-3),isIntersection(100,100,300,100,200,0,200,300));
+//console.log(LineLineCollision(1,1,3,1,2,0,2,3));
 
-function isIntersection(asx,asy,afx,afy,bsx,bsy,bfx,bfy) {
-    var p = LineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy);
-    return (p.x - bsx) * (p.x - bfx) + (p.y - bsy) * (p.y - bfy) < 0 &&
-        (p.x - asx) * (p.x - bfx) + (p.y - asy) * (p.y - afy) < 0;
+
+function isPointCircleCollision(px,py,cx,cy,cr){
+    return (px - cx)**2 + (py - cy)**2 <= cr**2
 }
+
+function a(line,children){ //this で当たり判定したい一つの方 引数 判定したい集合のArray
+    let sx = line.sx,sy = line.sy,fx = line.fx,fy = line.fy,list1 = [],fin,v = [["top","left","top","right"],["top","right","bottom","right"],["bottom","right","bottom","left"],["bottom","left","top","left"]];
+    for(let i in children){
+        if(isPointCircleCollision(children[i].x,children[i].y,sx,sy,10))list1.push(children[i]);
+        console.log(children[i])
+    }
+    console.log(list1)
+    if(list1.length === 0)return false;
+    for(let l in list1){
+        let obj = list1[l];
+        for(let j = 0;j <= 3;j++){
+            let o = LineLineCollision(obj[v[j][1]],obj[v[j][0]],obj[v[j][3]],obj[v[j][2]],sx,sy,fx,fy);
+            if(o){
+                if(!fin)fin = o;
+                else if(o.x**2+o.y**2 < fin.x**2+fin.y**2)fin = o;
+            }
+            console.log(obj[v[j][1]],obj[v[j][0]],obj[v[j][3]],obj[v[j][2]],sx,sy,fx,fy)
+            console.log(o)
+        }
+    }
+    if(!fin)return false;
+    return fin
+}
+console.log(a({sx:0,sy:0,fx:10,fy:10},[{x:5,y:5,top:7,bottom:3,left:3,right:7},{x:6,y:6,top:8,bottom:4,left:4,right:8}]));
 
 function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each vertex's coordinate and the coordinate of the point
     let a = new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by)),
@@ -117,6 +156,7 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){
+            console.log(test(e.pointer.x,e.pointer.y,500,500))
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
             if(this.player.canMove){
                 this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
