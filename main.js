@@ -68,8 +68,9 @@ function LineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy){
         y:asy + (afy-asy)*t
     };
 }
-function test(a,b,c,d){
-    return 100*(a-c)/Math.sqrt((a-c)**2+(b-d)**2);
+function test(a,b,c,d,l){
+    let e = Math.sqrt((a-c)**2+(b-d)**2);
+    return {x:l*(a-c)/e+c,y:l*(b-d)/e+d};
 }
 function isLineLineCollision(ax, ay, bx, by, cx, cy, dx, dy) {
     var ta = (cx - dx) * (ay - cy) + (cy - dy) * (cx - ax);
@@ -87,14 +88,15 @@ function isPointCircleCollision(px,py,cx,cy,cr){
     return (px - cx)**2 + (py - cy)**2 <= cr**2
 }
 
-function a(line,children){ //this で当たり判定したい一つの方 引数 判定したい集合のArray
+function wireCollision(line,children){ //this で当たり判定したい一つの方 引数 判定したい集合のArray
     let sx = line.sx,sy = line.sy,fx = line.fx,fy = line.fy,list1 = [],fin,v = [["top","left","top","right"],["top","right","bottom","right"],["bottom","right","bottom","left"],["bottom","left","top","left"]];
     for(let i in children){
-        if(isPointCircleCollision(children[i].x,children[i].y,sx,sy,10))list1.push(children[i]);
-        console.log(children[i])
+        if(isPointCircleCollision(children[i].x,children[i].y,sx,sy,Assets.wLength))list1.push(children[i]);
+        //console.log(children[i])
     }
-    console.log(list1)
+    //console.log(list1)
     if(list1.length === 0)return false;
+    console.log(" not 0");
     for(let l in list1){
         let obj = list1[l];
         for(let j = 0;j <= 3;j++){
@@ -103,14 +105,12 @@ function a(line,children){ //this で当たり判定したい一つの方 引数
                 if(!fin)fin = o;
                 else if(o.x**2+o.y**2 < fin.x**2+fin.y**2)fin = o;
             }
-            console.log(obj[v[j][1]],obj[v[j][0]],obj[v[j][3]],obj[v[j][2]],sx,sy,fx,fy)
-            console.log(o)
         }
     }
     if(!fin)return false;
     return fin
 }
-console.log(a({sx:0,sy:0,fx:10,fy:10},[{x:5,y:5,top:7,bottom:3,left:3,right:7},{x:6,y:6,top:8,bottom:4,left:4,right:8}]));
+console.log(wireCollision({sx:0,sy:0,fx:10,fy:10},[{x:5,y:5,top:7,bottom:3,left:3,right:7},{x:6,y:6,top:8,bottom:4,left:4,right:8}]));
 
 function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each vertex's coordinate and the coordinate of the point
     let a = new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by)),
@@ -138,6 +138,9 @@ phina.define("TestScene", {
         this.mapName = "map1";
         let self = this;
         this.gravity = Assets.AoG/Assets.FPS;
+        
+
+
         this.group = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
@@ -149,6 +152,15 @@ phina.define("TestScene", {
             this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
             this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
         };
+        let elem = PlainElement({
+            x:this.gridX.center(),
+            y:this.gridY.center(),
+            width:Assets.screenWidth,
+            height:Assets.screenHeight,
+        }).addChildTo(this);
+        this.ctx = elem.canvas;
+        this.ctx.strokeStyle = "#FFFFFF";
+        this.ctx.lineWidth = 10;
         this.group.ax = 0;
         this.group.ay = 0;
         MyMap(this.mapName).generate(this.group);
@@ -156,8 +168,15 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){
-            console.log(test(e.pointer.x,e.pointer.y,500,500))
-            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval;
+            console.log(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength));
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.gridX.center(),this.gridY.center());
+            this.ctx.lineTo(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y);
+            this.ctx.closePath();
+            this.ctx.stroke();
+            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children);
+            console.log(w)
+            this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
                 this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
