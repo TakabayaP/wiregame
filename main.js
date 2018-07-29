@@ -18,7 +18,7 @@ const Assets = {
     AoG:30,//Acceleration of gravity,
     wPower:10,
     wSpeed:1,
-    wLength:400,
+    wLength:500,
     maxSpeed:30,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0.1,
@@ -56,7 +56,13 @@ const Scenes = [{
 function error(message){
     throw new Error(message);
 }
-
+function drawLine(sx,sy,ex,ey){
+    this.beginPath();
+    this.moveTo(sx,sy);
+    this.lineTo(ex,ey);
+    this.closePath();
+    this.stroke();
+}
 function LineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy){
     if(!isLineLineCollision(asx,asy,afx,afy,bsx,bsy,bfx,bfy))return false;
     let a = new Vector2(bfx-bsx,bfy-bsy).cross(new Vector2(bsx-asx,bsy-asy)),
@@ -88,10 +94,10 @@ function isPointCircleCollision(px,py,cx,cy,cr){
     return (px - cx)**2 + (py - cy)**2 <= cr**2
 }
 
-function wireCollision(line,children){ //this で当たり判定したい一つの方 引数 判定したい集合のArray
-    let sx = line.sx,sy = line.sy,fx = line.fx,fy = line.fy,list1 = [],fin,v = [["top","left","top","right"],["top","right","bottom","right"],["bottom","right","bottom","left"],["bottom","left","top","left"]];
+function wireCollision(line,children,mapChipSize){ //this で当たり判定したい一つの方 引数 判定したい集合のArray
+    let mapChipMaxL = Math.sqrt(((mapChipSize/2)**2)*2),sx = line.sx,sy = line.sy,fx = line.fx,fy = line.fy,list1 = [],fin,v = [["top","left","top","right"],["top","right","bottom","right"],["bottom","right","bottom","left"],["top","left","bottom","left"]];
     for(let i in children){
-        if(isPointCircleCollision(children[i].x,children[i].y,sx,sy,Assets.wLength))list1.push(children[i]);
+        if(isPointCircleCollision(children[i].x,children[i].y,sx,sy,Assets.wLength+mapChipMaxL)&&children[i].collision)list1.push(children[i]);
         //console.log(children[i])
     }
     //console.log(list1)
@@ -101,16 +107,18 @@ function wireCollision(line,children){ //this で当たり判定したい一つ�
         let obj = list1[l];
         for(let j = 0;j <= 3;j++){
             let o = LineLineCollision(obj[v[j][1]],obj[v[j][0]],obj[v[j][3]],obj[v[j][2]],sx,sy,fx,fy);
-            if(o){
+            
+            if(o){console.log(o)
                 if(!fin)fin = o;
-                else if(o.x**2+o.y**2 < fin.x**2+fin.y**2)fin = o;
+                else if((o.x-sx)**2+(o.y-sy)**2 < (fin.x-sx)**2+(fin.y-sy)**2)fin = o;
             }
         }
     }
-    if(!fin)return false;
+    console.log(fin)
+    if(fin === undefined)return false;
     return fin
 }
-console.log(wireCollision({sx:0,sy:0,fx:10,fy:10},[{x:5,y:5,top:7,bottom:3,left:3,right:7},{x:6,y:6,top:8,bottom:4,left:4,right:8}]));
+//console.log(wireCollision({sx:0,sy:0,fx:10,fy:10},[{x:5,y:5,top:7,bottom:3,left:3,right:7},{x:6,y:6,top:8,bottom:4,left:4,right:8}],0));
 
 function TrianglePointCollision(ax,ay,bx,by,cx,cy,px,py){//in triangle's each vertex's coordinate and the coordinate of the point
     let a = new Vector2(bx-ax,by-ay).cross(new Vector2(px-bx,py-by)),
@@ -159,8 +167,8 @@ phina.define("TestScene", {
             height:Assets.screenHeight,
         }).addChildTo(this);
         this.ctx = elem.canvas;
-        this.ctx.strokeStyle = "#FFFFFF";
-        this.ctx.lineWidth = 10;
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.lineWidth = 1;
         this.group.ax = 0;
         this.group.ay = 0;
         MyMap(this.mapName).generate(this.group);
@@ -168,17 +176,12 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){
-            console.log(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength));
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.gridX.center(),this.gridY.center());
-            this.ctx.lineTo(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y);
-            this.ctx.closePath();
-            this.ctx.stroke();
-            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children);
-            console.log(w)
+            //console.log(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength));
+            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
+            //console.log(w)
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
-                this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                /*this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
                 this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
@@ -186,13 +189,14 @@ phina.define("TestScene", {
                 this.group.ay -= this.group.moveWY;
                 this.group.pax = this.group.ax*1.5;
                 this.group.pay = this.group.ay*1.5;
-                this.player.moveCounter = app.frame;
+                this.player.moveCounter = app.frame;*/
+                this.ctx.drawLine(this.gridX.center(),this.gridY.center(),w.x,w.y)
             }
         };
         this.onpointstay = function(e){
             if(this.player.canMove){
-                this.group.ay = this.group.pay;
-                this.group.ax = this.group.pax;
+                /*this.group.ay = this.group.pay;
+                this.group.ax = this.group.pax;*/
             }
         };
         
@@ -229,8 +233,8 @@ phina.define("MyMap",{
         if(mapChipNo === 1)return Ground({width:size,height:size});
         */
        switch(mapChipNo){
-           case 0:return RectangleObject({width:size,height:size});
-           case 1:return Ground({width:size,height:size});
+           case 0:return RectangleObject({width:size,height:size,collision:false});
+           case 1:return Ground({width:size,height:size,collision:true});
            default:console.log("mapChipNo is not defined");return RectangleObject({width:size,height:size});
        }
     }
@@ -240,6 +244,7 @@ phina.define("RectangleObject",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
+        this.collision = options.collision;
         this.fill = "yellow";
         this.strokeWidth = 0;
         this.width = options.width + Assets.mapChipAdd;
@@ -251,6 +256,7 @@ phina.define("Ground",{
     init:function(options){
         options = (options || {}).$safe(Ground.defaults);
         this.superInit(options);
+        this.collision = options.collision;
         this.width = options.width + Assets.mapChipAdd;
         this.height = options.height + Assets.mapChipAdd;
         this.strokeWidth = 0;
@@ -290,10 +296,12 @@ phina.define("Ground",{
                 console.log("Error at RectanglePointWay.Trying collision again.");
             }
             app.currentScene.onpointstay = function(){
-                this.group.ax = 0;
-                this.group.ay = 0;
-                this.group.pax = 0;
-                this.group.pay = 0;
+                if(this.player.canMove){
+                    this.group.ax = 0;
+                    this.group.ay = 0;
+                    this.group.pax = 0;
+                    this.group.pay = 0;
+                }
             };
         }
         
