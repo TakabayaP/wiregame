@@ -18,7 +18,7 @@ const Assets = {
     AoG:30,//Acceleration of gravity,
     wPower:10,
     wSpeed:1,
-    wLength:500,
+    wLength:Math.sqrt((500**2)*2),
     maxSpeed:30,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0.1,
@@ -155,6 +155,8 @@ phina.define("TestScene", {
                 this.children[i].x -= x;
                 this.children[i].y -= y;
             }
+            self.whx -=x;
+            self.why -=y;
         }; 
         this.group.setMapPosition = function(x,y){
             this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
@@ -169,6 +171,9 @@ phina.define("TestScene", {
         this.ctx = elem.canvas;
         this.ctx.strokeStyle = "#000000";
         this.ctx.lineWidth = 1;
+        this.ctx.fillStyle = "rgba(0,0,0,0)";
+        this.whx = 0;
+        this.why = 0;
         this.group.ax = 0;
         this.group.ay = 0;
         MyMap(this.mapName).generate(this.group);
@@ -177,11 +182,13 @@ phina.define("TestScene", {
     update: function (app) {
         this.onpointstart = function(e){
             //console.log(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength));
-            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
+            w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
             //console.log(w)
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
-                /*this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.whx = w.x;
+                this.why = w.y;
+                this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
                 this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
@@ -189,16 +196,22 @@ phina.define("TestScene", {
                 this.group.ay -= this.group.moveWY;
                 this.group.pax = this.group.ax*1.5;
                 this.group.pay = this.group.ay*1.5;
-                this.player.moveCounter = app.frame;*/
-                this.ctx.drawLine(this.gridX.center(),this.gridY.center(),w.x,w.y)
+                this.player.moveCounter = app.frame;
+                this.ctx.drawLine(this.gridX.center(),this.gridY.center(),this.whx,this.why);
             }
         };
         this.onpointstay = function(e){
             if(this.player.canMove){
-                /*this.group.ay = this.group.pay;
-                this.group.ax = this.group.pax;*/
+                this.group.ay = this.group.pay;
+                this.group.ax = this.group.pax;
+                console.log(this.whx)
+                this.ctx.clear();
+                this.ctx.drawLine(this.gridX.center(),this.gridY.center(),this.whx,this.why);
             }
         };
+        this.onpointend = function(){
+            this.ctx.clear();
+        }
         
         //this.group.x += this.ax;
         //this.group.y +=this.ay;
@@ -296,12 +309,12 @@ phina.define("Ground",{
                 console.log("Error at RectanglePointWay.Trying collision again.");
             }
             app.currentScene.onpointstay = function(){
-                if(this.player.canMove){
+                /*if(this.player.canMove){
                     this.group.ax = 0;
                     this.group.ay = 0;
                     this.group.pax = 0;
                     this.group.pay = 0;
-                }
+                }*/
             };
         }
         
@@ -323,6 +336,7 @@ phina.define("Playert",{
         this.maxSpeed = Assets.maxSpeed;
         this.canMove = true;
         this.moveCounter = 0;
+        this.radius = 20;
         /*this.ax = 0;
         this.ay = 0;*/
     },
