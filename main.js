@@ -5,10 +5,10 @@ const Assets = {
     },
     FPS:60,
     AoG:30,//Acceleration of gravity,
-    wPower:10,
+    wPower:7,
     wSpeed:1,
     wLength:Math.sqrt((500**2)*2),
-    maxSpeed:30,
+    maxSpeed:20,
     milPerFrame:1/60,//FPS
     playerMoveInterval:0.1,
     screenWidth:1024,
@@ -72,7 +72,7 @@ phina.define("TestScene", {
         }).addChildTo(this);
         this.ctx = elem.canvas;
         this.ctx.strokeStyle = "#000000";
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = 3;
         this.ctx.fillStyle = "rgba(0,0,0,0)";
         this.whx = 0;
         this.why = 0;
@@ -82,17 +82,15 @@ phina.define("TestScene", {
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
     update: function (app) {
-        this.onpointstart = function(e){
-            //console.log(test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength));
-            w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
-            //console.log(w)
+        this.onpointstart = function(e){//↓ウンコード
+            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
                 this.whx = w.x;
-                this.why = w.y;
+                this.why = w.y;//ワイヤーのアンカーポイント
                 this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
                 this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-                this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;
+                this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;//同じ方向だったら加速、それ以外なら跳ね返り
                 this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
                 this.group.ax -= this.group.moveWX;
                 this.group.ay -= this.group.moveWY;
@@ -100,6 +98,7 @@ phina.define("TestScene", {
                 this.group.pay = this.group.ay*1.5;
                 this.player.moveCounter = app.frame;
                 this.ctx.drawLine(this.gridX.center(),this.gridY.center(),this.whx,this.why);
+                this.player.isCabling = true;
             }
         };
         this.onpointstay = function(e){
@@ -113,6 +112,7 @@ phina.define("TestScene", {
         };
         this.onpointend = function(){
             this.ctx.clear();
+            this.player.isCabling = false;
         }
         
         //this.group.x += this.ax;
@@ -184,12 +184,17 @@ phina.define("Ground",{
         if(app.frame === 0){
             this.group = app.currentScene.group?app.currentScene.group:error("Group is not defined");
             this.player = app.currentScene.player?app.currentScene.player:error("Player is not defined");
+            this.ctx = app.currentScene.ctx?app.currentScene.ctx:error("ctx is not defined");
         }
         if(this.hitTestElement(this.player)){
             //console.log(this.y)//this.group.y-this.player.y;
             /*this.group.move(0,-this.top+this.player.bottom);
             this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
             this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
+            if(this.player.isCabling){
+                this.player.canMove = false;
+                this.ctx.clear();
+            }
             let way = RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2);
             if(way === "up"){
                 this.group.move(0,this.top-this.player.bottom);
@@ -239,6 +244,7 @@ phina.define("Playert",{
         this.canMove = true;
         this.moveCounter = 0;
         this.radius = 20;
+        isCabling = false;
         /*this.ax = 0;
         this.ay = 0;*/
     },
