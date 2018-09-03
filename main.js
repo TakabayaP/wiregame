@@ -53,7 +53,7 @@ phina.define("TestScene", {
         this.gravity = Assets.AoG/Assets.FPS;
         this.mapGroup = DisplayElement().addChildTo(this).setPosition(0,0);
         this.objectGroup = DisplayElement().addChildTo(this).setPosition(0,0);
-        this.group.move = function(x,y){
+        this.mapGroup.move = function(x,y){
             for(let i in this.children){
                 this.children[i].x -= x;
                 this.children[i].y -= y;
@@ -61,7 +61,7 @@ phina.define("TestScene", {
             self.whx -=x;
             self.why -=y;
         }; 
-        this.group.setMapPosition = function(x,y){
+        this.mapGroup.setMapPosition = function(x,y){
             this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
             this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
         };
@@ -77,26 +77,26 @@ phina.define("TestScene", {
         this.ctx.fillStyle = "rgba(0,0,0,0)";
         this.whx = 0;
         this.why = 0;
-        this.group.ax = 0;
-        this.group.ay = 0;
-        MyMap(this.mapName).generateMap(this.group);
+        this.mapGroup.ax = 0;
+        this.mapGroup.ay = 0;
+        MyMap(this.mapName).generateMap(this.mapGroup);
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
     update: function (app) {
         this.onpointstart = function(e){//↓ウンコード
-            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.group.children,Assets.maps[this.mapName].mapChipSize);
+            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.mapGroup.children,Assets.maps[this.mapName].mapChipSize);
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
                 this.whx = w.x;
                 this.why = w.y;//ワイヤーのアンカーポイント
-                this.group.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-                this.group.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
-                this.group.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.group.ay)?1:0;//同じ方向だったら加速、それ以外なら跳ね返り
-                this.group.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.group.ax)?1:0;
-                this.group.ax -= this.group.moveWX;
-                this.group.ay -= this.group.moveWY;
-                this.group.pax = this.group.ax*1.5;
-                this.group.pay = this.group.ay*1.5;
+                this.mapGroup.moveWX = Math.cos(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.mapGroup.moveWY = Math.sin(Math.atan2(e.pointer.y-this.player.y,e.pointer.x-this.player.x)+Math.PI)*Assets.wPower;
+                this.mapGroup.ay *= Math.sign(e.pointer.y-this.player.y)===Math.sign(this.mapGroup.ay)?1:0;//同じ方向だったら加速、それ以外なら跳ね返り
+                this.mapGroup.ax *= Math.sign(e.pointer.x-this.player.x)===Math.sign(this.mapGroup.ax)?1:0;
+                this.mapGroup.ax -= this.mapGroup.moveWX;
+                this.mapGroup.ay -= this.mapGroup.moveWY;
+                this.mapGroup.pax = this.mapGroup.ax*1.5;
+                this.mapGroup.pay = this.mapGroup.ay*1.5;
                 this.player.moveCounter = app.frame;
                 this.ctx.drawLine(this.gridX.center(),this.gridY.center(),this.whx,this.why);
                 this.player.isCabling = true;
@@ -104,8 +104,8 @@ phina.define("TestScene", {
         };
         this.onpointstay = function(e){
             if(this.player.canMove){
-                this.group.ay = this.group.pay;
-                this.group.ax = this.group.pax;
+                this.mapGroup.ay = this.mapGroup.pay;
+                this.mapGroup.ax = this.mapGroup.pax;
                 console.log(this.whx)
                 this.ctx.clear();
                 this.ctx.drawLine(this.gridX.center(),this.gridY.center(),this.whx,this.why);
@@ -116,10 +116,10 @@ phina.define("TestScene", {
             this.player.isCabling = false;
         }
         
-        //this.group.x += this.ax;
-        //this.group.y +=this.ay;
-        this.group.move(Math.abs(this.group.ax)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ax):this.group.ax,Math.abs(this.group.ay)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.group.ay):this.group.ay);
-        this.group.ay +=this.gravity;
+        //this.mapGroup.x += this.ax;
+        //this.mapGroup.y +=this.ay;
+        this.mapGroup.move(Math.abs(this.mapGroup.ax)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.mapGroup.ax):this.mapGroup.ax,Math.abs(this.mapGroup.ay)>this.player.maxSpeed?this.player.maxSpeed*Math.sign(this.mapGroup.ay):this.mapGroup.ay);
+        this.mapGroup.ay +=this.gravity;
         
     }
 });
@@ -184,45 +184,45 @@ phina.define("Ground",{
     },
     update:function(app){
         if(app.frame === 0){
-            this.group = app.currentScene.group?app.currentScene.group:error("Group is not defined");
+            this.mapGroup = app.currentScene.mapGroup?app.currentScene.mapGroup:error("Group is not defined");
             this.player = app.currentScene.player?app.currentScene.player:error("Player is not defined");
             this.ctx = app.currentScene.ctx?app.currentScene.ctx:error("ctx is not defined");
         }
         if(this.hitTestElement(this.player)){
-            //console.log(this.y)//this.group.y-this.player.y;
-            /*this.group.move(0,-this.top+this.player.bottom);
-            this.group.ay *= this.group.ay<this.minBounce?this.bounce:0;
-            this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;*/
+            //console.log(this.y)//this.mapGroup.y-this.player.y;
+            /*this.mapGroup.move(0,-this.top+this.player.bottom);
+            this.mapGroup.ay *= this.mapGroup.ay<this.minBounce?this.bounce:0;
+            this.mapGroup.ax *= Math.abs(this.mapGroup.ax)>this.staticFriction?this.dynamicFriction:0;*/
             if(this.player.isCabling){
                 this.player.canMove = false;
                 this.ctx.clear();
             }
             let way = RectanglePointWay(this.left,this.top,this.left,this.bottom,this.right,this.bottom,this.right,this.up,this.player.top + (this.player.bottom-this.player.top)/2,this.player.left+(this.player.right-this.player.left)/2);
             if(way === "up"){
-                this.group.move(0,this.top-this.player.bottom);
-                this.group.ay *= this.group.ay>this.minBounce?-this.bounce:0;
-                this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
+                this.mapGroup.move(0,this.top-this.player.bottom);
+                this.mapGroup.ay *= this.mapGroup.ay>this.minBounce?-this.bounce:0;
+                this.mapGroup.ax *= Math.abs(this.mapGroup.ax)>this.staticFriction?this.dynamicFriction:0;
             }else if(way === "down"){
-                this.group.move(0,this.bottom-this.player.top);
-                this.group.ay *= -this.bounce;
-                this.group.ax *= Math.abs(this.group.ax)>this.staticFriction?this.dynamicFriction:0;
+                this.mapGroup.move(0,this.bottom-this.player.top);
+                this.mapGroup.ay *= -this.bounce;
+                this.mapGroup.ax *= Math.abs(this.mapGroup.ax)>this.staticFriction?this.dynamicFriction:0;
             }else if(way === "right"){
-                this.group.move(this.right-this.player.left,0);
-                this.group.ay *= this.dynamicFriction;
-                this.group.ax *= -this.bounce;
+                this.mapGroup.move(this.right-this.player.left,0);
+                this.mapGroup.ay *= this.dynamicFriction;
+                this.mapGroup.ax *= -this.bounce;
             }else if(way === "left"){
-                this.group.move(this.left-this.player.right,0);
-                this.group.ay *= this.dynamicFriction;
-                this.group.ax *= -this.bounce;
+                this.mapGroup.move(this.left-this.player.right,0);
+                this.mapGroup.ay *= this.dynamicFriction;
+                this.mapGroup.ax *= -this.bounce;
             }else if(way === "error"){
                 console.log("Error at RectanglePointWay.Trying collision again.");
             }
             app.currentScene.onpointstay = function(){
                 /*if(this.player.canMove){
-                    this.group.ax = 0;
-                    this.group.ay = 0;
-                    this.group.pax = 0;
-                    this.group.pay = 0;
+                    this.mapGroup.ax = 0;
+                    this.mapGroup.ay = 0;
+                    this.mapGroup.pax = 0;
+                    this.mapGroup.pay = 0;
                 }*/
             };
         }
