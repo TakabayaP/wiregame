@@ -53,6 +53,12 @@ phina.define("TestScene", {
         this.gravity = Assets.AoG/Assets.FPS;
         this.mapGroup = DisplayElement().addChildTo(this).setPosition(0,0);
         this.objectGroup = DisplayElement().addChildTo(this).setPosition(0,0);
+        this.objectGroup.move = function(x,y){
+            for(let i in this.children){
+                this.children[i].x -= x;
+                this.children[i].y -= y;
+            }
+        }
         this.mapGroup.move = function(x,y){
             for(let i in this.children){
                 this.children[i].x -= x;
@@ -60,7 +66,8 @@ phina.define("TestScene", {
             }
             self.whx -=x;
             self.why -=y;
-        }; 
+            self.objectGroup.move(x,y);
+        };
         this.mapGroup.setMapPosition = function(x,y){
             this.mapChipSize = Assets.maps[self.mapName].mapChipSize;
             this.move(this.children[0].x-(3.5-x)*this.mapChipSize,this.children[0].y - (3.5-x)*this.mapChipSize); 
