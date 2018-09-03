@@ -152,7 +152,7 @@ phina.define("MyMap",{
     },
     generateObjects:function(parent){
         for(let n in this.map.objects){
-            this.map.objects[n][0].addChildTo(parent).setPosition(this.map.mapChipSize*this.map.objects[n][1],this.map.mapChipSize*this.map.objects[n][2]);
+            this.MapObject(this.map.object[n][0],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*this.map.objects[n][1],this.map.mapChipSize*this.map.objects[n][2]);
         }
     },
     MapChip:function(mapChipNo,size){
@@ -161,6 +161,12 @@ phina.define("MyMap",{
            case 1:return Ground({width:size,height:size,collision:true});
            default:console.log("mapChipNo is not defined");return RectangleObject({width:size,height:size});
        }
+    },
+    MapObject:function(objectName){
+        switch(objectName){
+            case "coin":return Coin({width:size*0.9,height:size*0.9});
+            default:console.log("objectName is not defined");return Coin()
+        }
     }
 });
 phina.define("RectangleObject",{
@@ -258,6 +264,13 @@ phina.define("Playert",{
     update:function(app){
     },
 });
+phina.define("Coin",{
+    superClass:"CircleShape",
+    init:function(options){
+        this.superInit(options);
+        this.radius = 
+    }
+})
 phina.define("WireHead",{
     superClass:"RectangleShape",
     init:function(options){
