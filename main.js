@@ -1,5 +1,4 @@
 phina.globalize();
-
 const Assets = {
     images:{
     },
@@ -245,19 +244,8 @@ phina.define("Playert",{
         this.moveCounter = 0;
         this.radius = 20;
         isCabling = false;
-        /*this.ax = 0;
-        this.ay = 0;*/
     },
-    /*move:function(e){
-        this.ay *= this.ay>0?0:1;
-        this.ax = -Math.cos(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
-        this.ay = -Math.sin(Math.atan2(e.pointer.y-this.y,e.pointer.x-this.x)+Math.PI)*Assets.wPower;
-        
-    },*/
-    update:function(app){/*
-        this.x += this.ax;
-        this.y +=this.ay;
-        this.ay += Assets.AoG/Assets.FPS;*/
+    update:function(app){
     },
 });
 phina.define("WireHead",{
