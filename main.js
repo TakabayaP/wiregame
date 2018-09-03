@@ -15,8 +15,6 @@ const Assets = {
     mapChipAdd:1.5,
     maps:{
         map1:{
-            //mapHeight:10,
-            //mapWidth:10,
             mapChipSize:1024/5,
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
@@ -28,7 +26,10 @@ const Assets = {
                 [1,0,1,0,0,0,1,1,0,1,],
                 [1,0,1,1,1,0,1,1,0,1,],
                 [1,0,0,0,0,0,0,0,0,1,],
-                [1,1,1,1,1,1,1,1,1,1,],]
+                [1,1,1,1,1,1,1,1,1,1,],],
+            objects:[
+                ["coin",2,2]
+            ]
         },
         map2:{
             mapChipSize:1024/14
@@ -50,7 +51,8 @@ phina.define("TestScene", {
         this.mapName = "map1";
         let self = this;
         this.gravity = Assets.AoG/Assets.FPS;
-        this.group = DisplayElement().addChildTo(this).setPosition(0,0);
+        this.mapGroup = DisplayElement().addChildTo(this).setPosition(0,0);
+        this.objectGroup = DisplayElement().addChildTo(this).setPosition(0,0);
         this.group.move = function(x,y){
             for(let i in this.children){
                 this.children[i].x -= x;
@@ -77,7 +79,7 @@ phina.define("TestScene", {
         this.why = 0;
         this.group.ax = 0;
         this.group.ay = 0;
-        MyMap(this.mapName).generate(this.group);
+        MyMap(this.mapName).generateMap(this.group);
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
     update: function (app) {
@@ -134,18 +136,19 @@ phina.define("MyMap",{
         }
         return rMap;
     },
-    generate:function(parent){
+    generateMap:function(parent){
         for(let y in this.map.main){
             for(let x in this.map.main[y]){
                 this.MapChip(this.map.main[y][x],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*x,this.map.mapChipSize*y);
             }
         }
     },
+    generateObjects:function(parent){
+        for(let n in this.map.objects){
+            this.map.objects[n][0].addChildTo(parent).setPosition(this.map.mapChipSize*this.map.objects[n][1],this.map.mapChipSize*this.map.objects[n][2]);
+        }
+    },
     MapChip:function(mapChipNo,size){
-        /*
-        if(mapChipNo === 0)return RectangleObject({width:size,height:size});
-        if(mapChipNo === 1)return Ground({width:size,height:size});
-        */
        switch(mapChipNo){
            case 0:return RectangleObject({width:size,height:size,collision:false});
            case 1:return Ground({width:size,height:size,collision:true});
