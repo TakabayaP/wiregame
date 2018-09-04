@@ -4,8 +4,9 @@ const Assets = {
     },
     FPS:60,
     AoG:30,//Acceleration of gravity,
-    wPower:7,
-    wSpeed:1,
+    wPower:7/2,///5で7
+    wSpeed:1/2,
+    pSize:20/2,
     wLength:Math.sqrt((500**2)*2),
     maxSpeed:20,
     milPerFrame:1/60,//FPS
@@ -15,7 +16,7 @@ const Assets = {
     mapChipAdd:1.5,
     maps:{
         map1:{
-            mapChipSize:1024/5,
+            mapChipSize:1024/10,
             main:[
                 [1,1,1,1,1,1,1,1,1,1,],
                 [0,0,1,0,0,0,1,0,0,1,],
@@ -87,6 +88,7 @@ phina.define("TestScene", {
         this.mapGroup.ax = 0;
         this.mapGroup.ay = 0;
         MyMap(this.mapName).generateMap(this.mapGroup);
+        MyMap(this.mapName).generateObjects(this.objectGroup);
         this.player = Playert().addChildTo(this).setPosition(this.gridX.center(),this.gridY.center());
     },
     update: function (app) {
@@ -152,7 +154,7 @@ phina.define("MyMap",{
     },
     generateObjects:function(parent){
         for(let n in this.map.objects){
-            this.MapObject(this.map.object[n][0],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*this.map.objects[n][1],this.map.mapChipSize*this.map.objects[n][2]);
+            this.MapObject(this.map.objects[n][0],this.map.mapChipSize).addChildTo(parent).setPosition(this.map.mapChipSize*this.map.objects[n][1],this.map.mapChipSize*this.map.objects[n][2]);
         }
     },
     MapChip:function(mapChipNo,size){
@@ -162,7 +164,7 @@ phina.define("MyMap",{
            default:console.log("mapChipNo is not defined");return RectangleObject({width:size,height:size});
        }
     },
-    MapObject:function(objectName){
+    MapObject:function(objectName,size){
         switch(objectName){
             case "coin":return Coin({width:size*0.9,height:size*0.9});
             default:console.log("objectName is not defined");return Coin()
@@ -258,17 +260,24 @@ phina.define("Playert",{
         this.maxSpeed = Assets.maxSpeed;
         this.canMove = true;
         this.moveCounter = 0;
-        this.radius = 20;
+        this.radius = Assets.pSize//10;
         isCabling = false;
     },
     update:function(app){
     },
 });
 phina.define("Coin",{
-    superClass:"CircleShape",
+    superClass:"RectangleShape",
     init:function(options){
+        options = (options || {}).$safe(Coin.defaults);
         this.superInit(options);
-        this.radius = 
+        this.width = options.width;
+        this.height = options.height;
+        this.fill = "white";
+    },
+    _static:{
+        defaults:{
+        }
     }
 })
 phina.define("WireHead",{
