@@ -34,6 +34,10 @@ const Assets = {
         },
         map2:{
             mapChipSize:1024/14
+        },
+        start:{
+            mapChipSize:100,
+            main:[]
         }
     }
 };
