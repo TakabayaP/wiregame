@@ -29,7 +29,7 @@ const Assets = {
                 [1,0,0,0,0,0,0,0,0,1,],
                 [1,1,1,1,1,1,1,1,1,1,],],
             objects:[
-                ["coin",2,2]
+                ["coin",3,3]
             ]
         },
         map2:{
@@ -97,7 +97,13 @@ phina.define("TestScene", {
     },
     update: function (app) {
         this.onpointstart = function(e){//↓ウンコード
-            let w = wireCollision({sx:this.gridX.center(),sy:this.gridY.center(),fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y},this.mapGroup.children,Assets.maps[this.mapName].mapChipSize);
+            let w = wireCollision(
+                {
+                    sx:this.gridX.center(),
+                    sy:this.gridY.center(),
+                    fx:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).x,
+                    fy:test(e.pointer.x,e.pointer.y,this.gridX.center(),this.gridY.center(),Assets.wLength).y
+                },this.mapGroup.children,Assets.maps[this.mapName].mapChipSize);
             this.player.canMove = Assets.milPerFrame*(app.frame-this.player.moveCounter)>=Assets.playerMoveInterval&&w;
             if(this.player.canMove){
                 this.whx = w.x;
@@ -235,15 +241,15 @@ phina.define("Ground",{
                 this.mapGroup.ax *= -this.bounce;
             }else if(way === "error"){
                 console.log("Error at RectanglePointWay.Trying collision again.");
-            }
+            }/*
             app.currentScene.onpointstay = function(){
                 /*if(this.player.canMove){
                     this.mapGroup.ax = 0;
                     this.mapGroup.ay = 0;
                     this.mapGroup.pax = 0;
                     this.mapGroup.pay = 0;
-                }*/
-            };
+                }
+        };*/
         }
         
     },
@@ -275,9 +281,13 @@ phina.define("Coin",{
     init:function(options){
         options = (options || {}).$safe(Coin.defaults);
         this.superInit(options);
+        
         this.width = options.width;
         this.height = options.height;
         this.fill = "white";
+    },
+    update:function(app){
+        this.hitTestElement(this.player);
     },
     _static:{
         defaults:{
